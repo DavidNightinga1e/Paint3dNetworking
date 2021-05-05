@@ -10,7 +10,8 @@ namespace Source.Networking
         public Vector3 Position;
         public Quaternion Rotation;
 
-        private const byte Size = (4 + 1 + 3 + 4) * sizeof(float); 
+        public const byte Size = (4 + 1 + 3 + 4) * sizeof(float);
+        
         private static readonly byte[] Mem = new byte[Size];
 
         public static short Serialize(StreamBuffer outStream, object obj)

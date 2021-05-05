@@ -103,8 +103,8 @@ namespace Source.Networking
         private void SendTexture(int targetActor)
         {
             var eventContent = paintableTexture.GetPngData();
-            var textureSize = eventContent.Length / 1024f;
-            print($"sent texture {textureSize} kbytes");
+            var size = eventContent.Length / 1024f;
+            print($"sent texture {size} kbytes");
 
             var raiseEventOptions = new RaiseEventOptions
             {
@@ -113,13 +113,38 @@ namespace Source.Networking
             };
 
             PhotonNetwork.RaiseEvent(
-                NetworkEvents.TextureHead,
-                textureSize,
+                NetworkEvents.ResourceLoadStart,
+                size,
                 raiseEventOptions,
                 SendOptions.SendReliable);
 
             PhotonNetwork.RaiseEvent(
                 NetworkEvents.Texture,
+                eventContent,
+                raiseEventOptions,
+                SendOptions.SendReliable);
+        }
+
+        private void SendTotalCache(int targetActor)
+        {
+            var eventContent = _totalBrushViewHitDataCache.ToArray();
+            var size = eventContent.Length * BrushViewHitData.Size / 1024f;
+            print($"sent total cache {size} kbytes");
+
+            var raiseEventOptions = new RaiseEventOptions
+            {
+                TargetActors = new[] {targetActor},
+                CachingOption = EventCaching.AddToRoomCache
+            };
+
+            PhotonNetwork.RaiseEvent(
+                NetworkEvents.ResourceLoadStart,
+                size,
+                raiseEventOptions,
+                SendOptions.SendReliable);
+
+            PhotonNetwork.RaiseEvent(
+                NetworkEvents.BrushTotalCache,
                 eventContent,
                 raiseEventOptions,
                 SendOptions.SendReliable);
@@ -138,20 +163,29 @@ namespace Source.Networking
                         if (PhotonNetwork.IsMasterClient)
                             _totalBrushViewHitDataCache.Add(brushViewHitData);
                     }
+
                     break;
-                
+
+                case NetworkEvents.ResourceLoadStart:
+                    var size = (float) photonEvent.CustomData;
+                    print($"received resource load start {size}");
+                    blocker.Text = $"Please, wait...\n\nDownloading resources:\n{size:0.00} kbytes";
+                    blocker.SetVisible(true);
+                    break;
+
                 case NetworkEvents.Texture:
                     print("received texture");
                     var texturePngRaw = (byte[]) photonEvent.CustomData;
                     paintableTexture.LoadFromData(texturePngRaw);
                     blocker.SetVisible(false);
                     break;
-
-                case NetworkEvents.TextureHead:
-                    var textureSize = (float) photonEvent.CustomData;
-                    print($"received texture head {textureSize}");
-                    blocker.Text = $"Please, wait...\n\nDownloading resources:\n{textureSize:0.00} kbytes";
-                    blocker.SetVisible(true);
+                
+                case NetworkEvents.BrushTotalCache:
+                    print("received brush total cache");
+                    var totalBrushViewHitArray = (BrushViewHitData[]) photonEvent.CustomData;
+                    foreach (var totalBrushViewHit in totalBrushViewHitArray) 
+                        HandleBrushHitPoint(totalBrushViewHit);
+                    blocker.SetVisible(false);
                     break;
             }
         }
@@ -163,8 +197,12 @@ namespace Source.Networking
 
         public void OnPlayerEnteredRoom(Player newPlayer)
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (!PhotonNetwork.IsMasterClient) return;
+
+            if (false)
                 SendTexture(newPlayer.ActorNumber);
+            else
+                SendTotalCache(newPlayer.ActorNumber);
         }
 
         public void OnPlayerLeftRoom(Player otherPlayer)
