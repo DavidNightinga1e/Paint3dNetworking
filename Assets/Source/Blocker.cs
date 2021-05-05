@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -25,5 +23,11 @@ public class Blocker : MonoBehaviour
     {
         _canvasGroup = GetComponent<CanvasGroup>();
         _textMeshProUgui = GetComponentInChildren<TextMeshProUGUI>();
+    }
+
+    private void ShowResourceDownloading(float size)
+    {
+        Text = $"Please, wait...\n\nDownloading resources:\n{size:0.00} kbytes";
+        SetVisible(true);
     }
 }
