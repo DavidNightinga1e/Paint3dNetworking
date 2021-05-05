@@ -130,8 +130,7 @@ namespace Source.Networking
         {
             var raiseEventOptions = new RaiseEventOptions
             {
-                TargetActors = new[] {actorNumber},
-                CachingOption = EventCaching.AddToRoomCache
+                TargetActors = new[] {actorNumber}
             };
 
             var textureSize = GetTextureSize(out var texture);
