@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using PaintIn3D;
@@ -16,10 +15,12 @@ namespace Source.Networking
         [SerializeField] private ColorPalette colorPalette;
         [SerializeField] private P3dPaintSphere paintSphere;
         [SerializeField] private P3dPaintableTexture paintableTexture;
+        [SerializeField] private Blocker blocker;
 
         private const float SendCooldown = 1f; // how often brush cache is being sent in seconds
 
         private readonly List<BrushViewHitData> _brushViewHitDataLocalCache = new List<BrushViewHitData>(1024);
+        private readonly List<BrushViewHitData> _totalBrushViewHitDataCache = new List<BrushViewHitData>(1024);
         private bool _sendCache = true;
 
         private void Awake()
@@ -41,6 +42,11 @@ namespace Source.Networking
             }
         }
 
+        public void ResetTexture()
+        {
+            paintableTexture.Clear();
+        }
+
         public void HandleHitPoint(bool preview, int priority, float pressure, int seed, Vector3 position,
             Quaternion rotation)
         {
@@ -60,6 +66,7 @@ namespace Source.Networking
                     BrushSize = colorPalette.BrushSize
                 };
                 _brushViewHitDataLocalCache.Add(brushViewHitData);
+                _totalBrushViewHitDataCache.Add(brushViewHitData);
 
                 HandleBrushHitPoint(brushViewHitData);
             }
@@ -86,7 +93,7 @@ namespace Source.Networking
 
             print("sent cache");
             PhotonNetwork.RaiseEvent(
-                1,
+                NetworkEvents.BrushCache,
                 _brushViewHitDataLocalCache.ToArray(),
                 new RaiseEventOptions {Receivers = ReceiverGroup.Others},
                 SendOptions.SendReliable);
@@ -95,29 +102,56 @@ namespace Source.Networking
 
         private void SendTexture(int targetActor)
         {
-            print("sent texture");
+            var eventContent = paintableTexture.GetPngData();
+            var textureSize = eventContent.Length / 1024f;
+            print($"sent texture {textureSize} kbytes");
 
-            // PhotonNetwork.RaiseEvent(
-            //     2,
-            //     paintableTexture.GetPngData(),
-            //     new RaiseEventOptions {TargetActors = new[] {targetActor}, CachingOption = EventCaching.AddToRoomCache},
-            //     SendOptions.SendUnreliable);
+            var raiseEventOptions = new RaiseEventOptions
+            {
+                TargetActors = new[] {targetActor},
+                CachingOption = EventCaching.AddToRoomCache
+            };
+
+            PhotonNetwork.RaiseEvent(
+                NetworkEvents.TextureHead,
+                textureSize,
+                raiseEventOptions,
+                SendOptions.SendReliable);
+
+            PhotonNetwork.RaiseEvent(
+                NetworkEvents.Texture,
+                eventContent,
+                raiseEventOptions,
+                SendOptions.SendReliable);
         }
 
         public void OnEvent(EventData photonEvent)
         {
             switch (photonEvent.Code)
             {
-                case 1:
-                    print("got cache");
+                case NetworkEvents.BrushCache:
+                    print("received cache");
                     var brushViewHitArray = (BrushViewHitData[]) photonEvent.CustomData;
                     foreach (var brushViewHitData in brushViewHitArray)
+                    {
                         HandleBrushHitPoint(brushViewHitData);
+                        if (PhotonNetwork.IsMasterClient)
+                            _totalBrushViewHitDataCache.Add(brushViewHitData);
+                    }
                     break;
-                case 2:
-                    print("got texture");
+                
+                case NetworkEvents.Texture:
+                    print("received texture");
                     var texturePngRaw = (byte[]) photonEvent.CustomData;
                     paintableTexture.LoadFromData(texturePngRaw);
+                    blocker.SetVisible(false);
+                    break;
+
+                case NetworkEvents.TextureHead:
+                    var textureSize = (float) photonEvent.CustomData;
+                    print($"received texture head {textureSize}");
+                    blocker.Text = $"Please, wait...\n\nDownloading resources:\n{textureSize:0.00} kbytes";
+                    blocker.SetVisible(true);
                     break;
             }
         }

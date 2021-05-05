@@ -16,8 +16,12 @@ namespace Source
         [SerializeField] private Button newButton;
         [SerializeField] private Button disconnectButton;
 
+        private BrushView _brushView;
+
         private void Awake()
         {
+            _brushView = FindObjectOfType<BrushView>();
+            
             roomLabel.text = "<color=#ff0000>Connecting to master</color>";
             PhotonNetwork.ConnectUsingSettings();
             PhotonPeer.RegisterType(typeof(BrushViewHitData), (byte) 'b', BrushViewHitData.Serialize,
@@ -30,16 +34,19 @@ namespace Source
 
         private void DisconnectButtonClick()
         {
+            _brushView.ResetTexture();
             PhotonNetwork.LeaveRoom();
         }
 
         private void NewButtonClick()
         {
+            _brushView.ResetTexture();
             PhotonNetwork.CreateRoom(Random.Range(0, 99).ToString("00"));
         }
 
         private void RandomButtonClick()
         {
+            _brushView.ResetTexture();
             if (!PhotonNetwork.JoinRandomRoom())
                 OnJoinRandomFailed(-1, string.Empty);
         }
@@ -47,6 +54,7 @@ namespace Source
         public override void OnConnectedToMaster()
         {
             roomLabel.text = "<color=#00aa00>On Master Server</color>";
+            
         }
 
         public override void OnJoinedRoom()
