@@ -19,15 +19,20 @@ namespace Source.Networking
 
         public event Action<float> OnResourceLoadStarted;
         public event Action OnResourceLoadEnded;
-        
+
         private const float SendCooldown = 1f; // how often brush cache is being sent in seconds
-        private const int MaxPhotonDataSize = 50; // (KB) https://doc.photonengine.com/en-us/pun/current/troubleshooting/faq#can_i_send_a_huge_message_using_photon_
+
+        private const int
+            MaxPhotonDataSize =
+                50; // (KB) https://doc.photonengine.com/en-us/pun/current/troubleshooting/faq#can_i_send_a_huge_message_using_photon_
 
         private readonly List<PaintSphereHitData> _brushViewHitDataLocalCache = new List<PaintSphereHitData>(1024);
-        private readonly List<PaintSphereHitData> _totalBrushViewHitDataCache = new List<PaintSphereHitData>(1024 * 50 / PaintSphereHitData.Size);
+
+        private readonly List<PaintSphereHitData> _totalBrushViewHitDataCache =
+            new List<PaintSphereHitData>(1024 * 50 / PaintSphereHitData.Size);
 
         private bool _sendCache = true;
-        
+
         private readonly RaiseEventOptions _sendCacheEventOptions = new RaiseEventOptions
         {
             Receivers = ReceiverGroup.Others
@@ -36,7 +41,7 @@ namespace Source.Networking
         private void Awake()
         {
             PhotonNetwork.AddCallbackTarget(this);
-            
+
             if (paintableTexture is null)
                 throw new NullReferenceException("Set Paintable Texture parameter");
             if (localPaintSphere is null)
@@ -86,6 +91,9 @@ namespace Source.Networking
         public void HandleHitPoint(bool preview, int priority, float pressure, int seed, Vector3 position,
             Quaternion rotation)
         {
+            if (Input.touchSupported && Input.touchCount > 1)
+                return;
+
             if (preview)
                 localPaintSphere.HandleHitPoint(true, 0, 1, seed, position, rotation);
             else
@@ -100,7 +108,8 @@ namespace Source.Networking
                 _brushViewHitDataLocalCache.Add(brushViewHitData);
                 _totalBrushViewHitDataCache.Add(brushViewHitData);
 
-                localPaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue), position, rotation);
+                localPaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue), position,
+                    rotation);
             }
         }
 
@@ -108,7 +117,8 @@ namespace Source.Networking
         {
             remotePaintSphere.Color = paintSphereHitData.Color;
             remotePaintSphere.Radius = paintSphereHitData.BrushSize;
-            remotePaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue), paintSphereHitData.Position,
+            remotePaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue),
+                paintSphereHitData.Position,
                 paintSphereHitData.Rotation);
         }
 
@@ -123,7 +133,6 @@ namespace Source.Networking
             if (_brushViewHitDataLocalCache.Count == 0 || !PhotonNetwork.InRoom)
                 return;
 
-            print("sent cache");
             PhotonNetwork.RaiseEvent(
                 NetworkEvents.BrushCache,
                 _brushViewHitDataLocalCache.ToArray(),
@@ -143,31 +152,7 @@ namespace Source.Networking
             var totalCacheSize = GetTotalCacheSize();
 
             if (totalCacheSize < textureSize)
-                SendTotalCache();
-            else
-                SendTexture();
-
-            void SendTexture()
             {
-                print($"sent texture {textureSize} kbytes");
-
-                PhotonNetwork.RaiseEvent(
-                    NetworkEvents.ResourceLoadStart,
-                    textureSize,
-                    raiseEventOptions,
-                    SendOptions.SendReliable);
-
-                PhotonNetwork.RaiseEvent(
-                    NetworkEvents.Texture,
-                    texture,
-                    raiseEventOptions,
-                    SendOptions.SendReliable);
-            }
-
-            void SendTotalCache()
-            {
-                print($"sent total cache {totalCacheSize} kbytes");
-
                 PhotonNetwork.RaiseEvent(
                     NetworkEvents.ResourceLoadStart,
                     totalCacheSize,
@@ -180,14 +165,27 @@ namespace Source.Networking
                     raiseEventOptions,
                     SendOptions.SendReliable);
             }
+            else
+            {
+                PhotonNetwork.RaiseEvent(
+                    NetworkEvents.ResourceLoadStart,
+                    textureSize,
+                    raiseEventOptions,
+                    SendOptions.SendReliable);
+
+                PhotonNetwork.RaiseEvent(
+                    NetworkEvents.Texture,
+                    texture,
+                    raiseEventOptions,
+                    SendOptions.SendReliable);
+            }
         }
-        
+
         public void OnEvent(EventData photonEvent)
         {
             switch (photonEvent.Code)
             {
                 case NetworkEvents.BrushCache:
-                    print("received cache");
                     var brushViewHitArray = (PaintSphereHitData[]) photonEvent.CustomData;
                     foreach (var brushViewHitData in brushViewHitArray)
                     {
@@ -195,23 +193,21 @@ namespace Source.Networking
                         if (PhotonNetwork.IsMasterClient)
                             _totalBrushViewHitDataCache.Add(brushViewHitData);
                     }
+
                     break;
 
                 case NetworkEvents.ResourceLoadStart:
                     var size = (float) photonEvent.CustomData;
-                    print($"received resource load start {size}");
                     OnResourceLoadStarted?.Invoke(size);
                     break;
 
                 case NetworkEvents.Texture:
-                    print("received texture");
                     var texturePngRaw = (byte[]) photonEvent.CustomData;
                     paintableTexture.LoadFromData(texturePngRaw);
                     OnResourceLoadEnded?.Invoke();
                     break;
 
                 case NetworkEvents.BrushTotalCache:
-                    print("received brush total cache");
                     var totalBrushViewHitArray = (PaintSphereHitData[]) photonEvent.CustomData;
                     foreach (var totalBrushViewHit in totalBrushViewHitArray)
                         RemotePaintSphere(totalBrushViewHit);

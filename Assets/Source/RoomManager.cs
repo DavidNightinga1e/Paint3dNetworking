@@ -1,6 +1,7 @@
 ﻿using System;
 using ExitGames.Client.Photon;
 using Photon.Pun;
+using Photon.Realtime;
 using Source.Networking;
 using TMPro;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace Source
     public class RoomManager : MonoBehaviourPunCallbacks
     {
         [SerializeField] private TextMeshProUGUI roomLabel;
+        [SerializeField] private TextMeshProUGUI errorsLabel;
         [SerializeField] private Button randomButton;
         [SerializeField] private Button newButton;
         [SerializeField] private Button disconnectButton;
@@ -23,6 +25,8 @@ namespace Source
             _paintableTextureNetworking = FindObjectOfType<PaintableTextureNetworking>();
             
             roomLabel.text = "<color=#ff0000>Connecting to master</color>";
+            errorsLabel.text = string.Empty;
+            
             PhotonNetwork.ConnectUsingSettings();
             PhotonPeer.RegisterType(typeof(PaintSphereHitData), (byte) 'b', PaintSphereHitData.Serialize,
                 PaintSphereHitData.Deserialize);
@@ -53,23 +57,30 @@ namespace Source
 
         public override void OnConnectedToMaster()
         {
-            roomLabel.text = "<color=#00aa00>On Master Server</color>";
-            
+            roomLabel.text = "<color=#ffaa00>On Master Server</color>";
+            errorsLabel.text = string.Empty;
         }
 
         public override void OnJoinedRoom()
         {
             roomLabel.text = $"<color=#00aaaa>Room: {PhotonNetwork.CurrentRoom.Name}</color>";
+            errorsLabel.text = string.Empty;
         }
 
         public override void OnJoinRandomFailed(short returnCode, string message)
         {
-            roomLabel.text = $"<color=#ff0000>Random failed - {returnCode}</color>";
+            errorsLabel.text = $"Random failed - {returnCode}";
         }
 
         public override void OnCreateRoomFailed(short returnCode, string message)
         {
-            roomLabel.text = $"<color=#ff0000>Create failed - {returnCode}</color>";
+            errorsLabel.text = $"Create failed - {returnCode}";
+        }
+
+        public override void OnMasterClientSwitched(Player newMasterClient)
+        {
+            PhotonNetwork.LeaveRoom();
+            errorsLabel.text = $"Master client left";
         }
     }
 }
