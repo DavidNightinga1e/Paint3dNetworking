@@ -255,7 +255,7 @@ GameObject:
   - component: {fileID: 151646022}
   - component: {fileID: 151646021}
   m_Layer: 0
-  m_Name: PaintSphere
+  m_Name: LocalPaintSphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -457,7 +457,7 @@ Transform:
   - {fileID: 6635029948747005604}
   - {fileID: 6583680707174080701}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &270111308
 GameObject:
@@ -1776,7 +1776,7 @@ RectTransform:
   - {fileID: 502247205}
   - {fileID: 1061049742}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1836,6 +1836,7 @@ MonoBehaviour:
   greenSlider: {fileID: 596232366}
   blueSlider: {fileID: 1530513432}
   brushSizeSlider: {fileID: 2121557338}
+  paintSphere: {fileID: 151646021}
 --- !u!1 &945042960
 GameObject:
   m_ObjectHideFlags: 0
@@ -1975,7 +1976,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1036311746
 GameObject:
@@ -3331,7 +3332,7 @@ Transform:
   m_Children:
   - {fileID: 1608908378}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1608908377
 GameObject:
@@ -3376,10 +3377,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16c8609f599e48789f4401ae6a01cdf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colorPalette: {fileID: 847605788}
-  paintSphere: {fileID: 151646021}
   paintableTexture: {fileID: 6829954181462346641}
-  blocker: {fileID: 1061049745}
+  localPaintSphere: {fileID: 151646021}
+  remotePaintSphere: {fileID: 1873017534}
 --- !u!1 &1687258581
 GameObject:
   m_ObjectHideFlags: 0
@@ -3681,6 +3681,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1776266309}
   m_CullTransparentMesh: 1
+--- !u!1 &1873017533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1873017535}
+  - component: {fileID: 1873017534}
+  m_Layer: 0
+  m_Name: RemotePaintSphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1873017534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873017533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 724ff6f732015ec4e8fecdb3d889fb82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  group:
+    index: 0
+  targetModel: {fileID: 0}
+  targetTexture: {fileID: 0}
+  blendMode:
+    Index: 0
+    Color: {r: 1, g: 1, b: 1, a: 1}
+    Texture: {fileID: 0}
+    Kernel: 1
+    Channels: {x: 1, y: 1, z: 1, w: 1}
+  color: {r: 0, g: 0, b: 0, a: 1}
+  opacity: 1
+  angle: 0
+  scale: {x: 1, y: 1, z: 1}
+  radius: 0.03
+  hardness: 5
+  tileTexture: {fileID: 0}
+  tileTransform: {fileID: 0}
+  tileOpacity: 1
+  tileTransition: 4
+  modifiers:
+    modifierDatas: []
+--- !u!4 &1873017535
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873017533}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.2207923, z: -0.11236358}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1892163380
 GameObject:
   m_ObjectHideFlags: 0

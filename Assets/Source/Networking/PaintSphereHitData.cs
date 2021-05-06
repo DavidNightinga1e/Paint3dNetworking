@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Source.Networking
 {
-    public struct BrushViewHitData
+    public struct PaintSphereHitData
     {
         public Color Color;
         public float BrushSize;
@@ -16,7 +16,7 @@ namespace Source.Networking
 
         public static short Serialize(StreamBuffer outStream, object obj)
         {
-            var brushViewHitData = (BrushViewHitData) obj;
+            var brushViewHitData = (PaintSphereHitData) obj;
             lock (Mem)
             {
                 var bytes = Mem;
@@ -42,7 +42,7 @@ namespace Source.Networking
 
         public static object Deserialize(StreamBuffer inStream, short size)
         {
-            var brushViewHitData = new BrushViewHitData();
+            var brushViewHitData = new PaintSphereHitData();
             lock (Mem)
             {
                 inStream.Read(Mem, 0, size);

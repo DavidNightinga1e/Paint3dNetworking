@@ -16,16 +16,16 @@ namespace Source
         [SerializeField] private Button newButton;
         [SerializeField] private Button disconnectButton;
 
-        private BrushNetworking _brushNetworking;
+        private PaintableTextureNetworking _paintableTextureNetworking;
 
         private void Awake()
         {
-            _brushNetworking = FindObjectOfType<BrushNetworking>();
+            _paintableTextureNetworking = FindObjectOfType<PaintableTextureNetworking>();
             
             roomLabel.text = "<color=#ff0000>Connecting to master</color>";
             PhotonNetwork.ConnectUsingSettings();
-            PhotonPeer.RegisterType(typeof(BrushViewHitData), (byte) 'b', BrushViewHitData.Serialize,
-                BrushViewHitData.Deserialize);
+            PhotonPeer.RegisterType(typeof(PaintSphereHitData), (byte) 'b', PaintSphereHitData.Serialize,
+                PaintSphereHitData.Deserialize);
 
             randomButton.onClick.AddListener(RandomButtonClick);
             newButton.onClick.AddListener(NewButtonClick);
@@ -34,19 +34,19 @@ namespace Source
 
         private void DisconnectButtonClick()
         {
-            _brushNetworking.ResetTexture();
+            _paintableTextureNetworking.ResetTexture();
             PhotonNetwork.LeaveRoom();
         }
 
         private void NewButtonClick()
         {
-            _brushNetworking.ResetTexture();
+            _paintableTextureNetworking.ResetTexture();
             PhotonNetwork.CreateRoom(Random.Range(0, 99).ToString("00"));
         }
 
         private void RandomButtonClick()
         {
-            _brushNetworking.ResetTexture();
+            _paintableTextureNetworking.ResetTexture();
             if (!PhotonNetwork.JoinRandomRoom())
                 OnJoinRandomFailed(-1, string.Empty);
         }

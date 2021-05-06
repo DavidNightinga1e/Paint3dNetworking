@@ -1,3 +1,4 @@
+using Source.Networking;
 using TMPro;
 using UnityEngine;
 
@@ -23,9 +24,18 @@ public class Blocker : MonoBehaviour
     {
         _canvasGroup = GetComponent<CanvasGroup>();
         _textMeshProUgui = GetComponentInChildren<TextMeshProUGUI>();
+
+        var networking = FindObjectOfType<PaintableTextureNetworking>();
+        networking.OnResourceLoadStarted += NetworkingResourceLoadStarted;
+        networking.OnResourceLoadEnded += NetworkingResourceLoadEnded;
     }
 
-    private void ShowResourceDownloading(float size)
+    private void NetworkingResourceLoadEnded()
+    {
+        SetVisible(false);
+    }
+
+    private void NetworkingResourceLoadStarted(float size)
     {
         Text = $"Please, wait...\n\nDownloading resources:\n{size:0.00} kbytes";
         SetVisible(true);

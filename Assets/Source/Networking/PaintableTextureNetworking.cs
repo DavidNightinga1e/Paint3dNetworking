@@ -11,24 +11,23 @@ using Random = UnityEngine.Random;
 
 namespace Source.Networking
 {
-    public class BrushNetworking : MonoBehaviour, IHit, IHitPoint, IOnEventCallback, IInRoomCallbacks
+    public class PaintableTextureNetworking : MonoBehaviour, IHit, IHitPoint, IOnEventCallback, IInRoomCallbacks
     {
-        public IBrushColorProvider brushColorProvider;
-        public IBrushSizeProvider brushSizeProvider;
         public P3dPaintableTexture paintableTexture;
-        public P3dPaintSphere paintSphere;
+        public P3dPaintSphere localPaintSphere;
+        public P3dPaintSphere remotePaintSphere;
 
+        public event Action<float> OnResourceLoadStarted;
+        public event Action OnResourceLoadEnded;
+        
         private const float SendCooldown = 1f; // how often brush cache is being sent in seconds
         private const int MaxPhotonDataSize = 50; // (KB) https://doc.photonengine.com/en-us/pun/current/troubleshooting/faq#can_i_send_a_huge_message_using_photon_
 
-        private readonly List<BrushViewHitData> _brushViewHitDataLocalCache = new List<BrushViewHitData>(1024);
-        private readonly List<BrushViewHitData> _totalBrushViewHitDataCache = new List<BrushViewHitData>(1024 * 50 / BrushViewHitData.Size);
+        private readonly List<PaintSphereHitData> _brushViewHitDataLocalCache = new List<PaintSphereHitData>(1024);
+        private readonly List<PaintSphereHitData> _totalBrushViewHitDataCache = new List<PaintSphereHitData>(1024 * 50 / PaintSphereHitData.Size);
 
         private bool _sendCache = true;
-
-        public event Action OnResourceLoadStarted;
-        public event Action OnResourceLoadEnded;
-
+        
         private readonly RaiseEventOptions _sendCacheEventOptions = new RaiseEventOptions
         {
             Receivers = ReceiverGroup.Others
@@ -37,13 +36,22 @@ namespace Source.Networking
         private void Awake()
         {
             PhotonNetwork.AddCallbackTarget(this);
+            
+            if (paintableTexture is null)
+                throw new NullReferenceException("Set Paintable Texture parameter");
+            if (localPaintSphere is null)
+                throw new NullReferenceException("Set Local Paint Sphere parameter");
+            if (remotePaintSphere is null)
+                throw new NullReferenceException("Set Remote Paint Sphere parameter");
+            if (ReferenceEquals(localPaintSphere, remotePaintSphere))
+                throw new Exception("Local Sphere and Remote Sphere must be different components");
         }
 
         private void Start()
         {
             var textureSize = GetTextureSize(out _);
             if (textureSize > MaxPhotonDataSize)
-                Debug.LogError("Target texture exceeds recommended max size");
+                Debug.LogWarning("Target texture exceeds recommended max size");
 
             StartCoroutine(SendCacheCoroutine());
         }
@@ -65,45 +73,43 @@ namespace Source.Networking
 
         private float GetTotalCacheSize()
         {
-            return _totalBrushViewHitDataCache.Count * BrushViewHitData.Size / 1024f;
+            return _totalBrushViewHitDataCache.Count * PaintSphereHitData.Size / 1024f;
         }
 
         public void ResetTexture()
         {
             paintableTexture.Clear();
+            _brushViewHitDataLocalCache.Clear();
+            _totalBrushViewHitDataCache.Clear();
         }
 
         public void HandleHitPoint(bool preview, int priority, float pressure, int seed, Vector3 position,
             Quaternion rotation)
         {
             if (preview)
-            {
-                paintSphere.Color = brushColorProvider.Color;
-                paintSphere.Radius = brushSizeProvider.BrushSize;
-                paintSphere.HandleHitPoint(true, 0, 1, seed, position, rotation);
-            }
+                localPaintSphere.HandleHitPoint(true, 0, 1, seed, position, rotation);
             else
             {
-                var brushViewHitData = new BrushViewHitData
+                var brushViewHitData = new PaintSphereHitData
                 {
-                    Color = brushColorProvider.Color,
+                    Color = localPaintSphere.Color,
                     Position = position,
                     Rotation = rotation,
-                    BrushSize = brushSizeProvider.BrushSize
+                    BrushSize = localPaintSphere.Radius
                 };
                 _brushViewHitDataLocalCache.Add(brushViewHitData);
                 _totalBrushViewHitDataCache.Add(brushViewHitData);
 
-                HandleBrushHitPoint(brushViewHitData);
+                localPaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue), position, rotation);
             }
         }
 
-        private void HandleBrushHitPoint(BrushViewHitData brushViewHitData)
+        private void RemotePaintSphere(PaintSphereHitData paintSphereHitData)
         {
-            paintSphere.Color = brushViewHitData.Color;
-            paintSphere.Radius = brushViewHitData.BrushSize;
-            paintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue), brushViewHitData.Position,
-                brushViewHitData.Rotation);
+            remotePaintSphere.Color = paintSphereHitData.Color;
+            remotePaintSphere.Radius = paintSphereHitData.BrushSize;
+            remotePaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue), paintSphereHitData.Position,
+                paintSphereHitData.Rotation);
         }
 
         private void Update()
@@ -114,7 +120,7 @@ namespace Source.Networking
 
         private void SendCache()
         {
-            if (_brushViewHitDataLocalCache.Count == 0)
+            if (_brushViewHitDataLocalCache.Count == 0 || !PhotonNetwork.InRoom)
                 return;
 
             print("sent cache");
@@ -170,32 +176,31 @@ namespace Source.Networking
 
                 PhotonNetwork.RaiseEvent(
                     NetworkEvents.BrushTotalCache,
-                    _totalBrushViewHitDataCache,
+                    _totalBrushViewHitDataCache.ToArray(),
                     raiseEventOptions,
                     SendOptions.SendReliable);
             }
         }
-
-
+        
         public void OnEvent(EventData photonEvent)
         {
             switch (photonEvent.Code)
             {
                 case NetworkEvents.BrushCache:
                     print("received cache");
-                    var brushViewHitArray = (BrushViewHitData[]) photonEvent.CustomData;
+                    var brushViewHitArray = (PaintSphereHitData[]) photonEvent.CustomData;
                     foreach (var brushViewHitData in brushViewHitArray)
                     {
-                        HandleBrushHitPoint(brushViewHitData);
+                        RemotePaintSphere(brushViewHitData);
                         if (PhotonNetwork.IsMasterClient)
                             _totalBrushViewHitDataCache.Add(brushViewHitData);
                     }
-
                     break;
 
                 case NetworkEvents.ResourceLoadStart:
                     var size = (float) photonEvent.CustomData;
                     print($"received resource load start {size}");
+                    OnResourceLoadStarted?.Invoke(size);
                     break;
 
                 case NetworkEvents.Texture:
@@ -207,10 +212,10 @@ namespace Source.Networking
 
                 case NetworkEvents.BrushTotalCache:
                     print("received brush total cache");
-                    var totalBrushViewHitArray = (BrushViewHitData[]) photonEvent.CustomData;
+                    var totalBrushViewHitArray = (PaintSphereHitData[]) photonEvent.CustomData;
                     foreach (var totalBrushViewHit in totalBrushViewHitArray)
-                        HandleBrushHitPoint(totalBrushViewHit);
-                    OnResourceLoadStarted?.Invoke();
+                        RemotePaintSphere(totalBrushViewHit);
+                    OnResourceLoadEnded?.Invoke();
                     break;
             }
         }
@@ -241,6 +246,7 @@ namespace Source.Networking
 
         public void OnMasterClientSwitched(Player newMasterClient)
         {
+            Debug.LogError("Master client switch is not supported");
         }
     }
 }
