@@ -219,7 +219,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.5990566, b: 0.6150943, a: 1}
+  m_Color: {r: 1, g: 0.2971698, b: 0.32473168, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2823,7 +2823,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.80738074, g: 1, b: 0.4481132, a: 1}
+  m_Color: {r: 0.36078432, g: 1, b: 0.4481132, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3581,7 +3581,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.495283, g: 0.94655925, b: 1, a: 1}
+  m_Color: {r: 0.1462264, g: 0.9073424, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4161,8 +4161,8 @@ MonoBehaviour:
   storeStates: 1
   showPreview: 0
   priority: 0
-  frequency: 0
-  interval: 3
+  frequency: 1
+  interval: 1
   connector:
     hitSpacing: 0
     hitLimit: 30
@@ -4195,6 +4195,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   paintSphereNetworking: {fileID: 1608908379}
   paintSphere: {fileID: 1597826801}
+  penToggle: {fileID: 0}
+  eraserToggle: {fileID: 0}
 --- !u!1 &1597826800
 GameObject:
   m_ObjectHideFlags: 0
@@ -4237,7 +4239,7 @@ MonoBehaviour:
     Texture: {fileID: 0}
     Kernel: 1
     Channels: {x: 1, y: 1, z: 1, w: 1}
-  color: {r: 0, g: 0, b: 0, a: 1}
+  color: {r: 0, g: 0, b: 0, a: 0.4392157}
   opacity: 1
   angle: 0
   scale: {x: 1, y: 1, z: 1}

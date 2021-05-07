@@ -27,12 +27,16 @@ public class ColorPalette : MonoBehaviour
 
     private void Awake()
     {
+        _color = new Color(redSlider.value, greenSlider.value, blueSlider.value, 1);
+        
         redSlider.onValueChanged.AddListener(f => OnColorChanged());
         greenSlider.onValueChanged.AddListener(f => OnColorChanged());
         blueSlider.onValueChanged.AddListener(f => OnColorChanged());
         brushSizeSlider.onValueChanged.AddListener(f => OnColorChanged());
         paintSphere.Color = _color;
         paintSphere.Radius = BrushSize;
+        
+        OnColorChanged();
     }
 
     private void OnColorChanged()

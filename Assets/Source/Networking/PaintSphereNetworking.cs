@@ -93,11 +93,11 @@ namespace Source.Networking
 
         private void RemotePaintSphere(PaintSphereHitData paintSphereHitData)
         {
-            _remotePaintSphere.Color = paintSphereHitData.Color;
+            _remotePaintSphere.Color = paintSphereHitData.Color.ToColor();
             _remotePaintSphere.Radius = paintSphereHitData.BrushSize;
             _remotePaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue),
                 paintSphereHitData.Position,
-                paintSphereHitData.Rotation);
+                Quaternion.identity);
         }
 
         private void Update()
