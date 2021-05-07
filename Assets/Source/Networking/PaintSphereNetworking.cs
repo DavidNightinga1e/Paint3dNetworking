@@ -11,20 +11,19 @@ using Random = UnityEngine.Random;
 
 namespace Source.Networking
 {
-    public class PaintableTextureNetworking : MonoBehaviour, IHit, IHitPoint, IOnEventCallback, IInRoomCallbacks
+    [RequireComponent(typeof(P3dPaintSphere))]
+    public class PaintSphereNetworking : MonoBehaviour,
+        IPaintableTextureNetworkingHitPoint,
+        IOnEventCallback,
+        IInRoomCallbacks
     {
-        public P3dPaintableTexture paintableTexture;
-        public P3dPaintSphere localPaintSphere;
-        public P3dPaintSphere remotePaintSphere;
-
         public event Action<float> OnResourceLoadStarted;
         public event Action OnResourceLoadEnded;
 
         private const float SendCooldown = 1f; // how often brush cache is being sent in seconds
 
-        private const int
-            MaxPhotonDataSize =
-                50; // (KB) https://doc.photonengine.com/en-us/pun/current/troubleshooting/faq#can_i_send_a_huge_message_using_photon_
+        private const int MaxPhotonDataSize = 50; // (KB)
+        // https://doc.photonengine.com/en-us/pun/current/troubleshooting/faq#can_i_send_a_huge_message_using_photon_
 
         private readonly List<PaintSphereHitData> _brushViewHitDataLocalCache = new List<PaintSphereHitData>(1024);
 
@@ -32,6 +31,8 @@ namespace Source.Networking
             new List<PaintSphereHitData>(1024 * 50 / PaintSphereHitData.Size);
 
         private bool _sendCache = true;
+        private P3dPaintSphere _remotePaintSphere;
+        private P3dPaintableTexture _paintableTexture;
 
         private readonly RaiseEventOptions _sendCacheEventOptions = new RaiseEventOptions
         {
@@ -42,14 +43,10 @@ namespace Source.Networking
         {
             PhotonNetwork.AddCallbackTarget(this);
 
-            if (paintableTexture is null)
-                throw new NullReferenceException("Set Paintable Texture parameter");
-            if (localPaintSphere is null)
-                throw new NullReferenceException("Set Local Paint Sphere parameter");
-            if (remotePaintSphere is null)
-                throw new NullReferenceException("Set Remote Paint Sphere parameter");
-            if (ReferenceEquals(localPaintSphere, remotePaintSphere))
-                throw new Exception("Local Sphere and Remote Sphere must be different components");
+            _remotePaintSphere = GetComponent<P3dPaintSphere>();
+            _paintableTexture = _remotePaintSphere.TargetTexture;
+            if (_paintableTexture is null)
+                throw new NullReferenceException($"Set Paintable Texture parameter on {_remotePaintSphere}");
         }
 
         private void Start()
@@ -72,7 +69,7 @@ namespace Source.Networking
 
         private float GetTextureSize(out byte[] texture)
         {
-            texture = paintableTexture.GetPngData();
+            texture = _paintableTexture.GetPngData();
             return texture.Length / 1024f;
         }
 
@@ -83,41 +80,22 @@ namespace Source.Networking
 
         public void ResetTexture()
         {
-            paintableTexture.Clear();
+            _paintableTexture.Clear();
             _brushViewHitDataLocalCache.Clear();
             _totalBrushViewHitDataCache.Clear();
         }
 
-        public void HandleHitPoint(bool preview, int priority, float pressure, int seed, Vector3 position,
-            Quaternion rotation)
+        public void NetworkHitPoint(PaintSphereHitData paintSphereHitData)
         {
-            if (Input.touchSupported && Input.touchCount > 1)
-                return;
-
-            if (preview)
-                localPaintSphere.HandleHitPoint(true, 0, 1, seed, position, rotation);
-            else
-            {
-                var brushViewHitData = new PaintSphereHitData
-                {
-                    Color = localPaintSphere.Color,
-                    Position = position,
-                    Rotation = rotation,
-                    BrushSize = localPaintSphere.Radius
-                };
-                _brushViewHitDataLocalCache.Add(brushViewHitData);
-                _totalBrushViewHitDataCache.Add(brushViewHitData);
-
-                localPaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue), position,
-                    rotation);
-            }
+            _brushViewHitDataLocalCache.Add(paintSphereHitData);
+            _totalBrushViewHitDataCache.Add(paintSphereHitData);
         }
 
         private void RemotePaintSphere(PaintSphereHitData paintSphereHitData)
         {
-            remotePaintSphere.Color = paintSphereHitData.Color;
-            remotePaintSphere.Radius = paintSphereHitData.BrushSize;
-            remotePaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue),
+            _remotePaintSphere.Color = paintSphereHitData.Color;
+            _remotePaintSphere.Radius = paintSphereHitData.BrushSize;
+            _remotePaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue),
                 paintSphereHitData.Position,
                 paintSphereHitData.Rotation);
         }
@@ -203,7 +181,7 @@ namespace Source.Networking
 
                 case NetworkEvents.Texture:
                     var texturePngRaw = (byte[]) photonEvent.CustomData;
-                    paintableTexture.LoadFromData(texturePngRaw);
+                    _paintableTexture.LoadFromData(texturePngRaw);
                     OnResourceLoadEnded?.Invoke();
                     break;
 

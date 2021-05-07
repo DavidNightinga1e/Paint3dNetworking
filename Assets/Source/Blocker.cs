@@ -25,7 +25,7 @@ public class Blocker : MonoBehaviour
         _canvasGroup = GetComponent<CanvasGroup>();
         _textMeshProUgui = GetComponentInChildren<TextMeshProUGUI>();
 
-        var networking = FindObjectOfType<PaintableTextureNetworking>();
+        var networking = FindObjectOfType<PaintSphereNetworking>();
         networking.OnResourceLoadStarted += NetworkingResourceLoadStarted;
         networking.OnResourceLoadEnded += NetworkingResourceLoadEnded;
     }
