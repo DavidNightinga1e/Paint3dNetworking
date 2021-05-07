@@ -6,8 +6,8 @@ public class CameraRotateAround : MonoBehaviour
     private readonly Vector3 _pointOfInterest = new Vector3(0, 1f, 0);
     private const float ZoomSpeed = 50f;
 
-    private const float MaxDistance = 160f;
-    private const float MinDistance = 8f;
+    private const float MaxDistance = 160f; // sqr
+    private const float MinDistance = 49f; // sqr
 
     private float GetSqrDistanceToPointOfInterest() => Vector3.SqrMagnitude(transform.position - _pointOfInterest);
 
@@ -15,9 +15,9 @@ public class CameraRotateAround : MonoBehaviour
     {
         transform.position = _pointOfInterest;
         transform.rotation = Quaternion.identity;
-        transform.Translate(0, 0, -5, Space.Self);
-        transform.RotateAround(_pointOfInterest, transform.right, 17);
-        transform.RotateAround(_pointOfInterest, Vector3.up, 120);
+        transform.Translate(0, 0, -Mathf.Sqrt(MinDistance), Space.Self); 
+        transform.RotateAround(_pointOfInterest, transform.right, 18);
+        transform.RotateAround(_pointOfInterest, Vector3.up, 135);
     }
 
     void Update()
