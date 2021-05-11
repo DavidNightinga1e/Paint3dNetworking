@@ -18,7 +18,7 @@ namespace Source
             if (!preview)
                 paintSphereNetworking.NetworkHitPoint(new PaintSphereHitData
                 {
-                    BrushSize = paintSphere.Radius,
+                    BrushSize = FloatUtility.ToByte(paintSphere.Radius, 0.01f, 0.51f),
                     Color = paintSphere.Color,
                     Position = position,
                     BlendModeIndex = (byte) paintSphere.BlendMode.Index

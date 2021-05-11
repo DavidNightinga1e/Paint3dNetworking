@@ -104,7 +104,7 @@ namespace Source.Networking
         private void RemotePaintSphere(PaintSphereHitData paintSphereHitData)
         {
             _remotePaintSphere.Color = paintSphereHitData.Color;
-            _remotePaintSphere.Radius = paintSphereHitData.BrushSize;
+            _remotePaintSphere.Radius = FloatUtility.ToFloat(paintSphereHitData.BrushSize, 0.01f, 0.51f);
             if (_remotePaintSphere.BlendMode.Index != paintSphereHitData.BlendModeIndex)
                 _remotePaintSphere.BlendMode = paintSphereHitData.BlendModeIndex switch
                 {
