@@ -57,8 +57,13 @@ namespace Source
 
         public override void OnConnectedToMaster()
         {
-            roomLabel.text = "<color=#ffaa00>On Master Server</color>";
             errorsLabel.text = string.Empty;
+        }
+
+        private void Update()
+        {
+            if (PhotonNetwork.NetworkClientState == ClientState.ConnectedToMasterServer)
+                roomLabel.text = $"<color=#ffaa00>On Master Server</color> rooms online {PhotonNetwork.CountOfRooms}";
         }
 
         public override void OnJoinedRoom()
