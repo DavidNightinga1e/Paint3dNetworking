@@ -1789,6 +1789,50 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &676173739
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 676173741}
+  - component: {fileID: 676173740}
+  m_Layer: 0
+  m_Name: Remote Brush
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &676173740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 676173739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71c142381498481da286c7f5f08e8134, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  paintSphere: {fileID: 727126923}
+--- !u!4 &676173741
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 676173739}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 160, y: 540, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &707855520
 GameObject:
   m_ObjectHideFlags: 0
@@ -1864,6 +1908,74 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 707855520}
   m_CullTransparentMesh: 1
+--- !u!1 &727126922
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 727126924}
+  - component: {fileID: 727126923}
+  m_Layer: 0
+  m_Name: Remote Brush Paint Sphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &727126923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 727126922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 724ff6f732015ec4e8fecdb3d889fb82, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  group:
+    index: 0
+  targetModel: {fileID: 0}
+  targetTexture: {fileID: 0}
+  blendMode:
+    Index: 0
+    Color: {r: 1, g: 1, b: 1, a: 1}
+    Texture: {fileID: 0}
+    Kernel: 1
+    Channels: {x: 1, y: 1, z: 1, w: 1}
+  color: {r: 0, g: 0, b: 0, a: 0.4392157}
+  opacity: 1
+  angle: 0
+  scale: {x: 1, y: 1, z: 1}
+  radius: 0.03
+  hardness: 5
+  tileTexture: {fileID: 0}
+  tileTransform: {fileID: 0}
+  tileOpacity: 1
+  tileTransition: 4
+  modifiers:
+    modifierDatas: []
+--- !u!4 &727126924
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 727126922}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 160, y: 540, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &734820261
 GameObject:
   m_ObjectHideFlags: 0
@@ -2035,7 +2147,7 @@ RectTransform:
   - {fileID: 502247205}
   - {fileID: 1061049742}
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2091,6 +2203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c270006829c474a478e8894b4ff6e897, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  paintSphere: {fileID: 1597826801}
   redSlider: {fileID: 1893195042}
   greenSlider: {fileID: 596232366}
   blueSlider: {fileID: 1530513432}
@@ -2099,7 +2212,6 @@ MonoBehaviour:
   greenSliderBackground: {fileID: 2095315861}
   blueSliderBackground: {fileID: 707855522}
   resultColor: {fileID: 1852269521}
-  paintSphere: {fileID: 1597826801}
   penToggle: {fileID: 562999710}
   eraserToggle: {fileID: 349071562}
 --- !u!1 &878645853
@@ -2346,7 +2458,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1005973625
 GameObject:
@@ -4127,7 +4239,7 @@ GameObject:
   - component: {fileID: 1538485106}
   - component: {fileID: 1538485109}
   m_Layer: 0
-  m_Name: Brush
+  m_Name: Local Brush
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4195,7 +4307,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9feea473b2149428ebf925d59bb05a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  paintSphereNetworking: {fileID: 1608908379}
   paintSphere: {fileID: 1597826801}
 --- !u!1 &1597826800
 GameObject:
@@ -4208,7 +4319,7 @@ GameObject:
   - component: {fileID: 1597826802}
   - component: {fileID: 1597826801}
   m_Layer: 0
-  m_Name: PaintSphere
+  m_Name: Local Brush Paint Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4275,7 +4386,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1608908378}
   - component: {fileID: 1608908379}
-  - component: {fileID: 1608908380}
   m_Layer: 0
   m_Name: PaintNetworking
   m_TagString: Untagged
@@ -4295,7 +4405,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1608908379
 MonoBehaviour:
@@ -4309,43 +4419,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16c8609f599e48789f4401ae6a01cdf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1608908380
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1608908377}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 724ff6f732015ec4e8fecdb3d889fb82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  layers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  group:
-    index: 0
-  targetModel: {fileID: 0}
-  targetTexture: {fileID: 295559247154725115}
-  blendMode:
-    Index: 0
-    Color: {r: 1, g: 1, b: 1, a: 1}
-    Texture: {fileID: 0}
-    Kernel: 1
-    Channels: {x: 1, y: 1, z: 1, w: 1}
-  color: {r: 0, g: 0, b: 0, a: 1}
-  opacity: 1
-  angle: 0
-  scale: {x: 1, y: 1, z: 1}
-  radius: 0.03
-  hardness: 5
-  tileTexture: {fileID: 0}
-  tileTransform: {fileID: 0}
-  tileOpacity: 1
-  tileTransition: 4
-  modifiers:
-    modifierDatas: []
+  remoteBrush: {fileID: 676173740}
+  localBrush: {fileID: 1538485109}
+  paintableTexture: {fileID: 295559247154725115}
 --- !u!1 &1679742129
 GameObject:
   m_ObjectHideFlags: 0

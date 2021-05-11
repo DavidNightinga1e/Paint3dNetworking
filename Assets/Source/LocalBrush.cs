@@ -1,13 +1,18 @@
-﻿using PaintIn3D;
+﻿using System;
+using PaintIn3D;
 using Source.Networking;
 using UnityEngine;
 
 namespace Source
 {
-    public class Brush : MonoBehaviour, IHit, IHitPoint
+    /// <summary>
+    /// Handles HitScreen and provides results to networking and paints it using paintSphere
+    /// </summary>
+    public class LocalBrush : MonoBehaviour, IHit, IHitPoint
     {
-        [SerializeField] private PaintSphereNetworking paintSphereNetworking;
         [SerializeField] private P3dPaintSphere paintSphere;
+
+        public event Action<PaintSphereHitData> OnBrushPaint; 
 
         public void HandleHitPoint(bool preview, int priority, float pressure, int seed, Vector3 position,
             Quaternion rotation)
@@ -16,7 +21,7 @@ namespace Source
                 return;
 
             if (!preview)
-                paintSphereNetworking.NetworkHitPoint(new PaintSphereHitData
+                OnBrushPaint?.Invoke(new PaintSphereHitData
                 {
                     BrushSize = FloatUtility.ToByte(paintSphere.Radius, 0.01f, 0.51f),
                     Color = paintSphere.Color,

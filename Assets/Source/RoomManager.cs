@@ -18,11 +18,11 @@ namespace Source
         [SerializeField] private Button newButton;
         [SerializeField] private Button disconnectButton;
 
-        private PaintSphereNetworking _paintSphereNetworking;
+        private PaintTextureNetworking _paintTextureNetworking;
 
         private void Awake()
         {
-            _paintSphereNetworking = FindObjectOfType<PaintSphereNetworking>();
+            _paintTextureNetworking = FindObjectOfType<PaintTextureNetworking>();
             
             roomLabel.text = "<color=#ff0000>Connecting to master</color>";
             errorsLabel.text = string.Empty;
@@ -38,19 +38,19 @@ namespace Source
 
         private void DisconnectButtonClick()
         {
-            _paintSphereNetworking.ResetTexture();
+            _paintTextureNetworking.ResetTexture();
             PhotonNetwork.LeaveRoom();
         }
 
         private void NewButtonClick()
         {
-            _paintSphereNetworking.ResetTexture();
+            _paintTextureNetworking.ResetTexture();
             PhotonNetwork.CreateRoom(Random.Range(0, 99).ToString("00"));
         }
 
         private void RandomButtonClick()
         {
-            _paintSphereNetworking.ResetTexture();
+            _paintTextureNetworking.ResetTexture();
             if (!PhotonNetwork.JoinRandomRoom())
                 OnJoinRandomFailed(-1, string.Empty);
         }
