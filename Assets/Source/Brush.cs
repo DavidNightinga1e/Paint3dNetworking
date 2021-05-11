@@ -21,7 +21,7 @@ namespace Source
                     BrushSize = paintSphere.Radius,
                     Color = paintSphere.Color,
                     Position = position,
-                    BlendModeIndex = paintSphere.BlendMode.Index
+                    BlendModeIndex = (byte) paintSphere.BlendMode.Index
                 });
 
             paintSphere.HandleHitPoint(preview, priority, pressure, seed, position, Quaternion.identity);

@@ -5,12 +5,12 @@ namespace Source.Networking
 {
     public struct PaintSphereHitData
     {
-        public Color Color;
+        public Color32 Color;
         public float BrushSize;
         public Vector3 Position;
-        public int BlendModeIndex;
+        public byte BlendModeIndex;
 
-        public const byte Size = (3 + 1 + 3) * sizeof(float) + sizeof(int);
+        public const byte Size = 3 * sizeof(byte) * (1 + 3) * sizeof(float) + sizeof(byte);
 
         private static readonly byte[] Mem = new byte[Size];
 
@@ -21,14 +21,15 @@ namespace Source.Networking
             {
                 var bytes = Mem;
                 var index = 0;
-                Protocol.Serialize(brushViewHitData.Color.r, bytes, ref index);
-                Protocol.Serialize(brushViewHitData.Color.g, bytes, ref index);
-                Protocol.Serialize(brushViewHitData.Color.b, bytes, ref index);
+                bytes[index++] = brushViewHitData.Color.r;
+                bytes[index++] = brushViewHitData.Color.g;
+                bytes[index++] = brushViewHitData.Color.b;
                 Protocol.Serialize(brushViewHitData.BrushSize, bytes, ref index);
                 Protocol.Serialize(brushViewHitData.Position.x, bytes, ref index);
                 Protocol.Serialize(brushViewHitData.Position.y, bytes, ref index);
                 Protocol.Serialize(brushViewHitData.Position.z, bytes, ref index);
                 Protocol.Serialize(brushViewHitData.BlendModeIndex, bytes, ref index);
+                bytes[index] = brushViewHitData.BlendModeIndex;
 
                 outStream.Write(bytes, 0, Size);
             }
@@ -42,16 +43,17 @@ namespace Source.Networking
             lock (Mem)
             {
                 inStream.Read(Mem, 0, size);
+                
                 var index = 0;
-                Protocol.Deserialize(out brushViewHitData.Color.r, Mem, ref index);
-                Protocol.Deserialize(out brushViewHitData.Color.g, Mem, ref index);
-                Protocol.Deserialize(out brushViewHitData.Color.b, Mem, ref index);
-                brushViewHitData.Color.a = 1;
+                brushViewHitData.Color.r = Mem[index++];
+                brushViewHitData.Color.g = Mem[index++];
+                brushViewHitData.Color.b = Mem[index++];
+                brushViewHitData.Color.a = byte.MaxValue;
                 Protocol.Deserialize(out brushViewHitData.BrushSize, Mem, ref index);
                 Protocol.Deserialize(out brushViewHitData.Position.x, Mem, ref index);
                 Protocol.Deserialize(out brushViewHitData.Position.y, Mem, ref index);
                 Protocol.Deserialize(out brushViewHitData.Position.z, Mem, ref index);
-                Protocol.Deserialize(out brushViewHitData.BlendModeIndex, Mem, ref index);
+                brushViewHitData.BlendModeIndex = Mem[index];
             }
 
             return brushViewHitData;
