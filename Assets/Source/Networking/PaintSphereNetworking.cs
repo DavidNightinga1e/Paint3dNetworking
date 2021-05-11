@@ -93,19 +93,21 @@ namespace Source.Networking
 
         private void RemotePaintSphere(PaintSphereHitData paintSphereHitData)
         {
-            _remotePaintSphere.Color = paintSphereHitData.Color.ToColor();
+            _remotePaintSphere.Color = paintSphereHitData.Color;
             _remotePaintSphere.Radius = paintSphereHitData.BrushSize;
+            if (_remotePaintSphere.BlendMode.Index != paintSphereHitData.BlendModeIndex)
+                _remotePaintSphere.BlendMode = paintSphereHitData.BlendModeIndex switch
+                {
+                    P3dBlendMode.ALPHA_BLEND => P3dBlendMode.AlphaBlend(Vector4.one),
+                    P3dBlendMode.REPLACE_ORIGINAL => P3dBlendMode.ReplaceOriginal(Vector4.one),
+                    _ => throw new NotImplementedException()
+                };
+
             _remotePaintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue),
                 paintSphereHitData.Position,
                 Quaternion.identity);
         }
-
-        private void Update()
-        {
-            if (Input.GetMouseButtonUp(0))
-                SendCache();
-        }
-
+        
         private void SendCache()
         {
             if (_brushViewHitDataLocalCache.Count == 0 || !PhotonNetwork.InRoom)

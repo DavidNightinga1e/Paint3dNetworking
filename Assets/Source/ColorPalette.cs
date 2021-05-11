@@ -18,6 +18,12 @@ public class ColorPalette : MonoBehaviour
 
     [SerializeField] private P3dPaintSphere paintSphere;
 
+    [SerializeField] private Toggle penToggle;
+    [SerializeField] private Toggle eraserToggle;
+
+    private readonly P3dBlendMode _penModeBlend = P3dBlendMode.AlphaBlend(Vector4.one);
+    private readonly P3dBlendMode _eraserModeBlend = P3dBlendMode.ReplaceOriginal(Vector4.one);
+
     private static readonly int Color1 = Shader.PropertyToID("_Color");
     private static readonly int Color2 = Shader.PropertyToID("_Color2");
 
@@ -28,15 +34,30 @@ public class ColorPalette : MonoBehaviour
     private void Awake()
     {
         _color = new Color(redSlider.value, greenSlider.value, blueSlider.value, 1);
-        
+
         redSlider.onValueChanged.AddListener(f => OnColorChanged());
         greenSlider.onValueChanged.AddListener(f => OnColorChanged());
         blueSlider.onValueChanged.AddListener(f => OnColorChanged());
-        brushSizeSlider.onValueChanged.AddListener(f => OnColorChanged());
+        brushSizeSlider.onValueChanged.AddListener(f => paintSphere.Radius = BrushSize);
+        penToggle.onValueChanged.AddListener(OnPenToolMode);
+        eraserToggle.onValueChanged.AddListener(OnEraserToolMode);
         paintSphere.Color = _color;
         paintSphere.Radius = BrushSize;
-        
+
+        penToggle.isOn = true;
         OnColorChanged();
+    }
+
+    private void OnEraserToolMode(bool isOn)
+    {
+        if (isOn)
+            paintSphere.BlendMode = _eraserModeBlend;
+    }
+
+    private void OnPenToolMode(bool isOn)
+    {
+        if (isOn)
+            paintSphere.BlendMode = _penModeBlend;
     }
 
     private void OnColorChanged()

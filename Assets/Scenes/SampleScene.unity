@@ -2100,6 +2100,8 @@ MonoBehaviour:
   blueSliderBackground: {fileID: 707855522}
   resultColor: {fileID: 1852269521}
   paintSphere: {fileID: 1597826801}
+  penToggle: {fileID: 562999710}
+  eraserToggle: {fileID: 349071562}
 --- !u!1 &878645853
 GameObject:
   m_ObjectHideFlags: 0
@@ -4161,8 +4163,8 @@ MonoBehaviour:
   storeStates: 1
   showPreview: 0
   priority: 0
-  frequency: 1
-  interval: 1
+  frequency: 2
+  interval: 0.01
   connector:
     hitSpacing: 0
     hitLimit: 30
@@ -4195,8 +4197,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   paintSphereNetworking: {fileID: 1608908379}
   paintSphere: {fileID: 1597826801}
-  penToggle: {fileID: 0}
-  eraserToggle: {fileID: 0}
 --- !u!1 &1597826800
 GameObject:
   m_ObjectHideFlags: 0
