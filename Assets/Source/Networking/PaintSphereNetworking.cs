@@ -87,8 +87,18 @@ namespace Source.Networking
 
         public void NetworkHitPoint(PaintSphereHitData paintSphereHitData)
         {
-            _brushViewHitDataLocalCache.Add(paintSphereHitData);
+            AddLocalCache(paintSphereHitData);
+            AddTotalCache(paintSphereHitData);
+        }
+
+        private void AddTotalCache(PaintSphereHitData paintSphereHitData)
+        {
             _totalBrushViewHitDataCache.Add(paintSphereHitData);
+        }
+
+        private void AddLocalCache(PaintSphereHitData paintSphereHitData)
+        {
+            _brushViewHitDataLocalCache.Add(paintSphereHitData);
         }
 
         private void RemotePaintSphere(PaintSphereHitData paintSphereHitData)
@@ -107,7 +117,7 @@ namespace Source.Networking
                 paintSphereHitData.Position,
                 Quaternion.identity);
         }
-        
+
         private void SendCache()
         {
             if (_brushViewHitDataLocalCache.Count == 0 || !PhotonNetwork.InRoom)
@@ -166,14 +176,7 @@ namespace Source.Networking
             switch (photonEvent.Code)
             {
                 case NetworkEvents.BrushCache:
-                    var brushViewHitArray = (PaintSphereHitData[]) photonEvent.CustomData;
-                    foreach (var brushViewHitData in brushViewHitArray)
-                    {
-                        RemotePaintSphere(brushViewHitData);
-                        if (PhotonNetwork.IsMasterClient)
-                            _totalBrushViewHitDataCache.Add(brushViewHitData);
-                    }
-
+                    HandleCacheArray((PaintSphereHitData[]) photonEvent.CustomData);
                     break;
 
                 case NetworkEvents.ResourceLoadStart:
@@ -188,11 +191,18 @@ namespace Source.Networking
                     break;
 
                 case NetworkEvents.BrushTotalCache:
-                    var totalBrushViewHitArray = (PaintSphereHitData[]) photonEvent.CustomData;
-                    foreach (var totalBrushViewHit in totalBrushViewHitArray)
-                        RemotePaintSphere(totalBrushViewHit);
+                    HandleCacheArray((PaintSphereHitData[]) photonEvent.CustomData);
                     OnResourceLoadEnded?.Invoke();
                     break;
+            }
+        }
+
+        private void HandleCacheArray(PaintSphereHitData[] cacheArray)
+        {
+            foreach (var viewHit in cacheArray)
+            {
+                RemotePaintSphere(viewHit);
+                AddTotalCache(viewHit);
             }
         }
 
@@ -204,7 +214,6 @@ namespace Source.Networking
         public void OnPlayerEnteredRoom(Player newPlayer)
         {
             if (!PhotonNetwork.IsMasterClient) return;
-
             SendCurrentState(newPlayer.ActorNumber);
         }
 
@@ -222,7 +231,6 @@ namespace Source.Networking
 
         public void OnMasterClientSwitched(Player newMasterClient)
         {
-            Debug.LogError("Master client switch is not supported");
         }
     }
 }

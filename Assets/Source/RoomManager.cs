@@ -79,8 +79,6 @@ namespace Source
 
         public override void OnMasterClientSwitched(Player newMasterClient)
         {
-            PhotonNetwork.LeaveRoom();
-            errorsLabel.text = $"Master client left";
         }
     }
 }

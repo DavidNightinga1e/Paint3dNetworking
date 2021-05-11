@@ -28,7 +28,6 @@ namespace Source.Networking
                 Protocol.Serialize(brushViewHitData.Position.x, bytes, ref index);
                 Protocol.Serialize(brushViewHitData.Position.y, bytes, ref index);
                 Protocol.Serialize(brushViewHitData.Position.z, bytes, ref index);
-                Protocol.Serialize(brushViewHitData.BlendModeIndex, bytes, ref index);
                 bytes[index] = brushViewHitData.BlendModeIndex;
 
                 outStream.Write(bytes, 0, Size);
