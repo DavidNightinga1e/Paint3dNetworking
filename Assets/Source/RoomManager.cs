@@ -26,7 +26,8 @@ namespace Source
             
             roomLabel.text = "<color=#ff0000>Connecting to master</color>";
             errorsLabel.text = string.Empty;
-            
+
+            PhotonNetwork.GameVersion = "0.1";
             PhotonNetwork.ConnectUsingSettings();
             PhotonPeer.RegisterType(typeof(PaintSphereHitData), (byte) 'b', PaintSphereHitData.Serialize,
                 PaintSphereHitData.Deserialize);

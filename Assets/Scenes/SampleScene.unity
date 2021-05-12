@@ -4276,7 +4276,7 @@ MonoBehaviour:
   showPreview: 0
   priority: 0
   frequency: 2
-  interval: 0.01
+  interval: 0.005
   connector:
     hitSpacing: 0
     hitLimit: 30

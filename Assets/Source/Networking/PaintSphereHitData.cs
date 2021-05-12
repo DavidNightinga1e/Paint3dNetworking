@@ -58,7 +58,10 @@ namespace Source.Networking
                 Protocol.Deserialize(out short x, Mem, ref index);
                 Protocol.Deserialize(out short y, Mem, ref index);
                 Protocol.Deserialize(out short z, Mem, ref index);
-                brushViewHitData.Position = new half3(new half{value = (ushort)x}, new half{value = (ushort)y}, new half{value = (ushort)z});
+                brushViewHitData.Position = new half3();
+                brushViewHitData.Position.x.value = (ushort) x;
+                brushViewHitData.Position.y.value = (ushort) y;
+                brushViewHitData.Position.z.value = (ushort) z;
             }
 
             return brushViewHitData;

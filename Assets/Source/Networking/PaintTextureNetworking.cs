@@ -56,6 +56,9 @@ namespace Source.Networking
         private readonly List<PaintSphereHitData> _totalBrushViewHitDataCache =
             new List<PaintSphereHitData>(1024 * 50 / PaintSphereHitData.Size);
 
+        private bool _recordTotalCache = true;
+        private float _textureSize;
+
         #endregion
 
         private float TotalCacheSize => _totalBrushViewHitDataCache.Count * PaintSphereHitData.Size / 1024f;
@@ -85,8 +88,8 @@ namespace Source.Networking
 
         private void Start()
         {
-            var textureSize = GetTextureSize(out _);
-            if (textureSize > MaxPhotonDataSize)
+            _textureSize = GetTexture(out _);
+            if (_textureSize > MaxPhotonDataSize)
                 Debug.LogWarning("Target texture exceeds recommended max size");
 
             StartCoroutine(SendCacheCoroutine());
@@ -110,19 +113,28 @@ namespace Source.Networking
             }
         }
 
-        private float GetTextureSize(out byte[] texture)
+        private float GetTexture(out byte[] texture)
         {
             texture = paintableTexture.GetPngData();
             return texture.Length / 1024f;
         }
 
-        private void AddTotalCache(PaintSphereHitData paintSphereHitData) =>
+        private void AddTotalCache(PaintSphereHitData paintSphereHitData)
+        {
+            if (!_recordTotalCache)
+                return;
+            
             _totalBrushViewHitDataCache.Add(paintSphereHitData);
+
+            if (!(TotalCacheSize > _textureSize)) 
+                return;
+            
+            _recordTotalCache = false;
+            _totalBrushViewHitDataCache.Clear();
+        }
 
         private void SendCurrentState(int actorNumber)
         {
-            var textureSize = GetTextureSize(out var texture);
-
             var raiseEventOptions = new RaiseEventOptions
             {
                 TargetActors = new[] {actorNumber}
@@ -137,14 +149,15 @@ namespace Source.Networking
                     SendOptions.SendReliable);
             }
 
-            if (TotalCacheSize < textureSize)
+            if (TotalCacheSize < _textureSize)
             {
                 SendEvent(NetworkEvents.ResourceLoadStart, TotalCacheSize);
                 SendEvent(NetworkEvents.BrushTotalCache, _totalBrushViewHitDataCache.ToArray());
             }
             else
             {
-                SendEvent(NetworkEvents.ResourceLoadStart, textureSize);
+                var size = GetTexture(out var texture);
+                SendEvent(NetworkEvents.ResourceLoadStart, size);
                 SendEvent(NetworkEvents.Texture, texture);
             }
         }
