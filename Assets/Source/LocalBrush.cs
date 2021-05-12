@@ -1,6 +1,7 @@
 ﻿using System;
 using PaintIn3D;
 using Source.Networking;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Source
@@ -25,7 +26,7 @@ namespace Source
                 {
                     BrushSize = FloatUtility.ToByte(paintSphere.Radius, 0.01f, 0.51f),
                     Color = paintSphere.Color,
-                    Position = position,
+                    Position = new half3(new half(position.x), new half(position.y), new half(position.z)),
                     BlendModeIndex = (byte) paintSphere.BlendMode.Index
                 });
 

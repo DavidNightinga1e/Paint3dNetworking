@@ -25,7 +25,8 @@ namespace Source
                     _ => throw new NotImplementedException()
                 };
             paintSphere.HandleHitPoint(false, 0, 1, Random.Range(int.MinValue, int.MaxValue),
-                paintSphereHitData.Position, Quaternion.identity);
+                new Vector3(paintSphereHitData.Position.x, paintSphereHitData.Position.y,
+                    paintSphereHitData.Position.z), Quaternion.identity);
         }
     }
 }

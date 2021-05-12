@@ -1,4 +1,5 @@
 ﻿using ExitGames.Client.Photon;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Source.Networking
@@ -8,13 +9,13 @@ namespace Source.Networking
         public Color32 Color;
         public byte BrushSize;
         public byte BlendModeIndex;
-        public Vector3 Position;
+        public half3 Position;
 
         public const byte Size =
             3 * sizeof(byte) + // color32
             1 * sizeof(byte) + // brushSize
             1 * sizeof(byte) + // blendModeIndex
-            3 * sizeof(float); // position
+            3 * sizeof(short); // position
 
         private static readonly byte[] Mem = new byte[Size];
 
@@ -30,9 +31,9 @@ namespace Source.Networking
                 bytes[index++] = brushViewHitData.Color.b;
                 bytes[index++] = brushViewHitData.BrushSize;
                 bytes[index++] = brushViewHitData.BlendModeIndex;
-                Protocol.Serialize(brushViewHitData.Position.x, bytes, ref index);
-                Protocol.Serialize(brushViewHitData.Position.y, bytes, ref index);
-                Protocol.Serialize(brushViewHitData.Position.z, bytes, ref index);
+                Protocol.Serialize((short) brushViewHitData.Position.x.value, bytes, ref index);
+                Protocol.Serialize((short) brushViewHitData.Position.y.value, bytes, ref index);
+                Protocol.Serialize((short) brushViewHitData.Position.z.value, bytes, ref index);
 
                 outStream.Write(bytes, 0, Size);
             }
@@ -54,9 +55,10 @@ namespace Source.Networking
                 brushViewHitData.Color.a = byte.MaxValue;
                 brushViewHitData.BrushSize = Mem[index++];
                 brushViewHitData.BlendModeIndex = Mem[index++];
-                Protocol.Deserialize(out brushViewHitData.Position.x, Mem, ref index);
-                Protocol.Deserialize(out brushViewHitData.Position.y, Mem, ref index);
-                Protocol.Deserialize(out brushViewHitData.Position.z, Mem, ref index);
+                Protocol.Deserialize(out short x, Mem, ref index);
+                Protocol.Deserialize(out short y, Mem, ref index);
+                Protocol.Deserialize(out short z, Mem, ref index);
+                brushViewHitData.Position = new half3(new half{value = (ushort)x}, new half{value = (ushort)y}, new half{value = (ushort)z});
             }
 
             return brushViewHitData;
