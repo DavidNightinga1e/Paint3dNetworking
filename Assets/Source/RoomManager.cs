@@ -12,6 +12,19 @@ namespace Source
 {
     public class RoomManager : MonoBehaviourPunCallbacks
     {
+        [Flags]
+        enum ButtonsState
+        {
+            Random = 1 << 1,
+            New = 1 << 2,
+            Disconnect = 1 << 3,
+            
+            None = 0,
+            OnMaster = Random | New,
+            InRoom = Disconnect,
+            All = Random | New | Disconnect
+        }
+
         [SerializeField] private TextMeshProUGUI roomLabel;
         [SerializeField] private TextMeshProUGUI errorsLabel;
         [SerializeField] private Button randomButton;
@@ -23,7 +36,7 @@ namespace Source
         private void Awake()
         {
             _paintTextureNetworking = FindObjectOfType<PaintTextureNetworking>();
-            
+
             roomLabel.text = "<color=#ff0000>Connecting to master</color>";
             errorsLabel.text = string.Empty;
 
@@ -35,22 +48,34 @@ namespace Source
             randomButton.onClick.AddListener(RandomButtonClick);
             newButton.onClick.AddListener(NewButtonClick);
             disconnectButton.onClick.AddListener(DisconnectButtonClick);
+            
+            ApplyButtonState(ButtonsState.None);
+        }
+
+        private void ApplyButtonState(ButtonsState buttonsState)
+        {
+            newButton.interactable = buttonsState.HasFlag(ButtonsState.New);
+            randomButton.interactable = buttonsState.HasFlag(ButtonsState.Random);
+            disconnectButton.interactable = buttonsState.HasFlag(ButtonsState.Disconnect);
         }
 
         private void DisconnectButtonClick()
         {
+            ApplyButtonState(ButtonsState.None);
             _paintTextureNetworking.ResetTexture();
             PhotonNetwork.LeaveRoom();
         }
 
         private void NewButtonClick()
         {
+            ApplyButtonState(ButtonsState.None);
             _paintTextureNetworking.ResetTexture();
             PhotonNetwork.CreateRoom(Random.Range(0, 99).ToString("00"));
         }
 
         private void RandomButtonClick()
         {
+            ApplyButtonState(ButtonsState.None);
             _paintTextureNetworking.ResetTexture();
             if (!PhotonNetwork.JoinRandomRoom())
                 OnJoinRandomFailed(-1, string.Empty);
@@ -59,6 +84,7 @@ namespace Source
         public override void OnConnectedToMaster()
         {
             errorsLabel.text = string.Empty;
+            ApplyButtonState(ButtonsState.OnMaster);
         }
 
         private void Update()
@@ -71,16 +97,19 @@ namespace Source
         {
             roomLabel.text = $"<color=#00aaaa>Room: {PhotonNetwork.CurrentRoom.Name}</color>";
             errorsLabel.text = string.Empty;
+            ApplyButtonState(ButtonsState.InRoom);
         }
 
         public override void OnJoinRandomFailed(short returnCode, string message)
         {
-            errorsLabel.text = $"Random failed - {returnCode}";
+            errorsLabel.text = $"Random failed - {message}";
+            ApplyButtonState(ButtonsState.OnMaster);
         }
 
         public override void OnCreateRoomFailed(short returnCode, string message)
         {
-            errorsLabel.text = $"Create failed - {returnCode}";
+            errorsLabel.text = $"Create failed - {message}";
+            ApplyButtonState(ButtonsState.OnMaster);
         }
 
         public override void OnMasterClientSwitched(Player newMasterClient)

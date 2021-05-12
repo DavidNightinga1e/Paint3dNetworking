@@ -1,4 +1,5 @@
 ﻿using ExitGames.Client.Photon;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -11,12 +12,7 @@ namespace Source.Networking
         public byte BlendModeIndex;
         public half3 Position;
 
-        public const byte Size =
-            3 * sizeof(byte) + // color32
-            1 * sizeof(byte) + // brushSize
-            1 * sizeof(byte) + // blendModeIndex
-            3 * sizeof(short); // position
-
+        public static readonly short Size = (short) UnsafeUtility.SizeOf<PaintSphereHitData>();
         private static readonly byte[] Mem = new byte[Size];
 
         public static short Serialize(StreamBuffer outStream, object obj)
@@ -58,10 +54,21 @@ namespace Source.Networking
                 Protocol.Deserialize(out short x, Mem, ref index);
                 Protocol.Deserialize(out short y, Mem, ref index);
                 Protocol.Deserialize(out short z, Mem, ref index);
-                brushViewHitData.Position = new half3();
-                brushViewHitData.Position.x.value = (ushort) x;
-                brushViewHitData.Position.y.value = (ushort) y;
-                brushViewHitData.Position.z.value = (ushort) z;
+                brushViewHitData.Position = new half3
+                {
+                    x =
+                    {
+                        value = (ushort) x
+                    },
+                    y =
+                    {
+                        value = (ushort) y
+                    },
+                    z =
+                    {
+                        value = (ushort) z
+                    }
+                };
             }
 
             return brushViewHitData;
