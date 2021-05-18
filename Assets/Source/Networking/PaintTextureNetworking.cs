@@ -93,7 +93,7 @@ namespace Source.Networking
                 Debug.LogWarning("Target texture exceeds recommended max size");
 
             StartCoroutine(SendCacheCoroutine());
-            
+
             IEnumerator SendCacheCoroutine()
             {
                 while (_sendCache)
@@ -123,12 +123,12 @@ namespace Source.Networking
         {
             if (!_recordTotalCache)
                 return;
-            
+
             _totalBrushViewHitDataCache.Add(paintSphereHitData);
 
-            if (!(TotalCacheSize > _textureSize)) 
+            if (!(TotalCacheSize > _textureSize))
                 return;
-            
+
             _recordTotalCache = false;
             _totalBrushViewHitDataCache.Clear();
         }
@@ -149,7 +149,7 @@ namespace Source.Networking
                     SendOptions.SendReliable);
             }
 
-            if (TotalCacheSize < _textureSize)
+            if (_recordTotalCache)
             {
                 SendEvent(NetworkEvents.ResourceLoadStart, TotalCacheSize);
                 SendEvent(NetworkEvents.BrushTotalCache, _totalBrushViewHitDataCache.ToArray());
@@ -178,6 +178,7 @@ namespace Source.Networking
                 case NetworkEvents.Texture:
                     var texturePngRaw = (byte[]) photonEvent.CustomData;
                     paintableTexture.LoadFromData(texturePngRaw);
+                    _recordTotalCache = false;
                     OnResourceLoadEnded?.Invoke();
                     break;
 
